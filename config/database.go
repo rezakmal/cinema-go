@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func ConnectDB(*sql.DB) {
+func ConnectDB() (*sql.DB, error) {
 	// get database connection parameters from environment variables
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
