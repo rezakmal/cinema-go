@@ -16,3 +16,9 @@ type CreateCinemaRequest struct {
 	Location string  `json:"location" binding:"required"`
 	Rating   float64 `json:"rating"`
 }
+
+type UpdateCinemaRequest struct {
+	Name     *string  `json:"name,omitempty"`
+	Location *string  `json:"location,omitempty"`
+	Rating   *float64 `json:"rating,omitempty"`
+}
