@@ -3,11 +3,13 @@ package main
 import (
 	"cinema-go/config"
 	"cinema-go/controllers"
+	"cinema-go/routes"
 	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -22,14 +24,19 @@ func main() {
 	}
 	defer db.Close()
 
+	// run database migrations
+	if err := config.RunMigrations(db); err != nil {
+		log.Fatal("Failed to run migrations: ", err)
+	}
+
 	// intiailize Gin router
 	r := gin.Default()
 
 	// initialize controller
 	cinemaController := controllers.NewCinemaController(db)
 
-	// routes
-	r.POST("/cinema", cinemaController.CreateCinema)
+	// setup routes
+	routes.SetupCinemaRoutes(r, cinemaController)
 
 	// start server
 	port := os.Getenv("PORT")
