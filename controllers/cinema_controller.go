@@ -317,3 +317,51 @@ func (bc *CinemaController) UpdateCinema(c *gin.Context) {
 		"data":    updatedCinema,
 	})
 }
+
+func (bc *CinemaController) DeleteCinema(c *gin.Context) {
+	id := c.Param("id")
+
+	// Convert id to int
+	var cinemaID int
+	_, err := fmt.Sscanf(id, "%d", &cinemaID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid cinema ID format",
+		})
+		return
+	}
+
+	// check if cinema exists
+	var exists bool
+	checkQuery := `SELECT EXISTS(SELECT 1 FROM cinema WHERE id = $1)`
+	err = bc.db.QueryRow(checkQuery, cinemaID).Scan(&exists)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to check cinema existence",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if !exists {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Cinema not found",
+		})
+		return
+	}
+
+	// execute delete query
+	deleteQuery := `DELETE FROM cinema WHERE id = $1`
+	_, err = bc.db.Exec(deleteQuery, cinemaID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to delete cinema",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Cinema deleted successfully",
+	})
+}
